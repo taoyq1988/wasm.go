@@ -11,11 +11,7 @@ func newFuncCompiler() funcCompiler {
 func (c *funcCompiler) genParams(paramCount int) {
 	for i := 0; i < paramCount; i++ {
 		c.printf("p%d", i)
-		if i < paramCount-1 {
-			c.print(", ")
-		} else {
-			c.print(" uint64")
-		}
+		c.printIf(i < paramCount-1, ", ", " uint64")
 	}
 }
 

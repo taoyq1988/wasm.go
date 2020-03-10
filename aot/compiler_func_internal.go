@@ -572,9 +572,7 @@ func (c *internalFuncCompiler) emitCall(funcIdx int) {
 	}
 	c.printf("m.f%d(", funcIdx)
 	for i := range ft.ParamTypes {
-		if i > 0 {
-			c.print(", ")
-		}
+		c.printIf(i > 0, ", ", "")
 		c.printf("stack[%d]", c.stackPtr+i)
 	}
 	if len(ft.ResultTypes) > 0 {
