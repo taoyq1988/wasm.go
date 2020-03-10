@@ -25,3 +25,11 @@ func (p *printer) println(s string) {
 func (p *printer) printf(format string, a ...interface{}) {
 	p.sb.WriteString(fmt.Sprintf(format, a...))
 }
+
+func (p *printer) printIf(cond bool, s1, s2 string) {
+	if cond {
+		p.print(s1)
+	} else {
+		p.print(s2)
+	}
+}
