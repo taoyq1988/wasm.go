@@ -164,39 +164,39 @@ func (c *internalFuncCompiler) emitInstr(instr binary.Instruction) {
 			instr.Args, c.stackPtr-1, opname, instr.Args)
 		c.stackPtr--
 	case binary.I32Load, binary.F32Load:
-		c.emitLoad(instr, opname, "l%d = uint64(m.readU32(l%d + %d)) // %s\n")
+		c.emitLoad(instr, "l%d = uint64(m.readU32(l%d + %d)) // %s\n")
 	case binary.I64Load, binary.F64Load:
-		c.emitLoad(instr, opname, "l%d = m.readU64(l%d + %d) // %s\n")
+		c.emitLoad(instr, "l%d = m.readU64(l%d + %d) // %s\n")
 	case binary.I32Load8S:
-		c.emitLoad(instr, opname, "l%d = uint64(int8(m.readU8(l%d + %d))) // %s\n")
+		c.emitLoad(instr, "l%d = uint64(int8(m.readU8(l%d + %d))) // %s\n")
 	case binary.I32Load8U:
-		c.emitLoad(instr, opname, "l%d = uint64(m.readU8(l%d + %d)) // %s\n")
+		c.emitLoad(instr, "l%d = uint64(m.readU8(l%d + %d)) // %s\n")
 	case binary.I32Load16S:
-		c.emitLoad(instr, opname, "l%d = uint64(int16(m.readU16(l%d + %d))) // %s\n")
+		c.emitLoad(instr, "l%d = uint64(int16(m.readU16(l%d + %d))) // %s\n")
 	case binary.I32Load16U:
-		c.emitLoad(instr, opname, "l%d = uint64(m.readU16(l%d + %d)) // %s\n")
+		c.emitLoad(instr, "l%d = uint64(m.readU16(l%d + %d)) // %s\n")
 	case binary.I64Load8S:
-		c.emitLoad(instr, opname, "l%d = uint64(int8(m.readU8(l%d + %d))) // %s\n")
+		c.emitLoad(instr, "l%d = uint64(int8(m.readU8(l%d + %d))) // %s\n")
 	case binary.I64Load8U:
-		c.emitLoad(instr, opname, "l%d = uint64(m.readU8(l%d + %d)) // %s\n")
+		c.emitLoad(instr, "l%d = uint64(m.readU8(l%d + %d)) // %s\n")
 	case binary.I64Load16S:
-		c.emitLoad(instr, opname, "l%d = uint64(int16(m.readU16(l%d + %d))) // %s\n")
+		c.emitLoad(instr, "l%d = uint64(int16(m.readU16(l%d + %d))) // %s\n")
 	case binary.I64Load16U:
-		c.emitLoad(instr, opname, "l%d = uint64(m.readU16(l%d + %d)) // %s\n")
+		c.emitLoad(instr, "l%d = uint64(m.readU16(l%d + %d)) // %s\n")
 	case binary.I64Load32S:
-		c.emitLoad(instr, opname, "l%d = uint64(int32(m.readU32(l%d + %d))) // %s\n")
+		c.emitLoad(instr, "l%d = uint64(int32(m.readU32(l%d + %d))) // %s\n")
 	case binary.I64Load32U:
-		c.emitLoad(instr, opname, "l%d = uint64(m.readU32(l%d + %d)) // %s\n")
+		c.emitLoad(instr, "l%d = uint64(m.readU32(l%d + %d)) // %s\n")
 	case binary.I32Store, binary.F32Store:
-		c.emitStore(instr, opname, "m.writeU32(l%d + %d, uint32(l%d)) // %s\n")
+		c.emitStore(instr, "m.writeU32(l%d + %d, uint32(l%d)) // %s\n")
 	case binary.I64Store, binary.F64Store:
-		c.emitStore(instr, opname, "m.writeU64(l%d + %d, l%d) // %s\n")
+		c.emitStore(instr, "m.writeU64(l%d + %d, l%d) // %s\n")
 	case binary.I32Store8, binary.I64Store8:
-		c.emitStore(instr, opname, "m.writeU8(l%d + %d, byte(l%d)) // %s\n")
+		c.emitStore(instr, "m.writeU8(l%d + %d, byte(l%d)) // %s\n")
 	case binary.I32Store16, binary.I64Store16:
-		c.emitStore(instr, opname, "m.writeU16(l%d + %d, uint16(l%d)) // %s\n")
+		c.emitStore(instr, "m.writeU16(l%d + %d, uint16(l%d)) // %s\n")
 	case binary.I64Store32:
-		c.emitStore(instr, opname, "m.writeU32(l%d + %d, uint32(l%d)) // %s\n")
+		c.emitStore(instr, "m.writeU32(l%d + %d, uint32(l%d)) // %s\n")
 	case binary.MemorySize:
 		c.emitMemSize(opname)
 	case binary.MemoryGrow:
@@ -598,13 +598,13 @@ func (c *internalFuncCompiler) emitCallIndirect() {
 	panic("TODO")
 }
 
-func (c *internalFuncCompiler) emitLoad(instr binary.Instruction, opname, tmpl string) {
+func (c *internalFuncCompiler) emitLoad(instr binary.Instruction, tmpl string) {
 	// l%d = m.readU32(l%d + %d) // %s\n
-	c.printf(tmpl, c.stackPtr-1, c.stackPtr-1, instr.Args.(binary.MemArg).Offset, opname)
+	c.printf(tmpl, c.stackPtr-1, c.stackPtr-1, instr.Args.(binary.MemArg).Offset, instr.GetOpname())
 }
-func (c *internalFuncCompiler) emitStore(instr binary.Instruction, opname, tmpl string) {
+func (c *internalFuncCompiler) emitStore(instr binary.Instruction, tmpl string) {
 	// m.writeU32(l%d + %d, uint32(l%d)) // %s\n
-	c.printf(tmpl, c.stackPtr-2, instr.Args.(binary.MemArg).Offset, c.stackPtr-1, opname)
+	c.printf(tmpl, c.stackPtr-2, instr.Args.(binary.MemArg).Offset, c.stackPtr-1, instr.GetOpname())
 	c.stackPtr -= 2
 }
 func (c *internalFuncCompiler) emitMemSize(opname string) {
