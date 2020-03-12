@@ -1,6 +1,8 @@
 package aot
 
 import (
+	"math"
+
 	"github.com/zxh0/wasm.go/binary"
 )
 
@@ -98,7 +100,7 @@ func Instantiate(iMap instance.Map) (instance.Instance, error) {
 	}
 	for i, g := range c.module.GlobalSec {
 		c.printf("	m.globals[%d] = interpreter.NewGlobal(%d, %t, %d)\n",
-			len(c.importedGlobals)+i, g.Type.ValType, g.Type.Mut == 1, 0) // TODO
+			len(c.importedGlobals)+i, g.Type.ValType, g.Type.Mut == 1, getConstVal(g.Expr))
 	}
 
 	c.println("	m.initMem()")
@@ -109,7 +111,7 @@ func (c *moduleCompiler) genMemInit() {
 	c.println("func (m *aotModule) initMem() {")
 	for _, data := range c.module.DataSec {
 		if len(data.Init) > 0 {
-			offset := getOffset(data.Offset)
+			offset := getConstVal(data.Offset)
 			c.printf("	m.memory.Write(%d, []byte(%q))\n",
 				offset, data.Init)
 		}
@@ -117,14 +119,18 @@ func (c *moduleCompiler) genMemInit() {
 	c.println("}")
 }
 
-func getOffset(constExpr []binary.Instruction) int {
+func getConstVal(constExpr []binary.Instruction) interface{} {
 	if len(constExpr) == 0 {
 		return 0
 	}
 	instr := constExpr[len(constExpr)-1]
 	switch instr.Opcode {
-	case binary.I32Const:
-		return int(instr.Args.(int32))
+	case binary.I32Const, binary.I64Const:
+		return instr.Args
+	case binary.F32Const:
+		return math.Float32bits(instr.Args.(float32))
+	case binary.F64Const:
+		return math.Float64bits(instr.Args.(float64))
 	default:
 		panic("TODO")
 	}
