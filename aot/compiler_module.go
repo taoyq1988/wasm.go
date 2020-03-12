@@ -1,6 +1,8 @@
 package aot
 
-import "github.com/zxh0/wasm.go/binary"
+import (
+	"github.com/zxh0/wasm.go/binary"
+)
 
 type moduleCompiler struct {
 	printer
@@ -161,6 +163,48 @@ func (c *moduleCompiler) genCallFunc() {
 
 func (c *moduleCompiler) genUtils() {
 	c.print(`
+func (m *aotModule) readU8(offset uint64) byte {
+	var buf [1]byte
+	m.memory.Read(offset, buf[:])
+	return buf[0]
+}
+func (m *aotModule) readU16(offset uint64) uint16 {
+	var buf [2]byte
+	m.memory.Read(offset, buf[:])
+	return LE.Uint16(buf[:])
+}
+func (m *aotModule) readU32(offset uint64) uint32 {
+	var buf [4]byte
+	m.memory.Read(offset, buf[:])
+	return LE.Uint32(buf[:])
+}
+func (m *aotModule) readU64(offset uint64) uint64 {
+	var buf [8]byte
+	m.memory.Read(offset, buf[:])
+	return LE.Uint64(buf[:])
+}
+
+func (m *aotModule) writeU8(offset uint64, n byte) {
+	var buf [1]byte
+	buf[0] = n
+	m.memory.Write(offset, buf[:])
+}
+func (m *aotModule) writeU16(offset uint64, n uint16) {
+	var buf [2]byte
+	LE.PutUint16(buf[:], n)
+	m.memory.Write(offset, buf[:])
+}
+func (m *aotModule) writeU32(offset uint64, n uint32) {
+	var buf [4]byte
+	LE.PutUint32(buf[:], n)
+	m.memory.Write(offset, buf[:])
+}
+func (m *aotModule) writeU64(offset uint64, n uint64) {
+	var buf [8]byte
+	LE.PutUint64(buf[:], n)
+	m.memory.Write(offset, buf[:])
+}
+
 // utils
 func b2i(b bool) uint64 { if b { return 1 } else { return 0 } }
 func f32(i uint64) float32 { return math.Float32frombits(uint32(i)) }
