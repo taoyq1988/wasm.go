@@ -620,12 +620,12 @@ func (c *internalFuncCompiler) emitI32BinCmpS(operator, opname string) {
 	c.stackPop()
 }
 func (c *internalFuncCompiler) emitI32BinArithU(operator, opname string) {
-	c.printf("stack[%d] = uint32(stack[%d]) %s uint32(stack[%d]) // %s\n",
+	c.printf("stack[%d] = uint64(uint32(stack[%d]) %s uint32(stack[%d])) // %s\n",
 		c.stackPtr-2, c.stackPtr-2, operator, c.stackPtr-1, opname)
 	c.stackPop()
 }
 func (c *internalFuncCompiler) emitI32BinArithS(operator, opname string) {
-	c.printf("stack[%d] = int32(stack[%d]) %s int32(stack[%d]) // %s\n",
+	c.printf("stack[%d] = uint64(int32(stack[%d]) %s int32(stack[%d])) // %s\n",
 		c.stackPtr-2, c.stackPtr-2, operator, c.stackPtr-1, opname)
 	c.stackPop()
 }
