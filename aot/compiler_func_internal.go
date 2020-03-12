@@ -82,8 +82,14 @@ func (c *internalFuncCompiler) compile(idx int,
 	c.genFuncBody(code, resultCount)
 	c.println("}")
 
+	s := c.sb.String()
 	stackMax := fmt.Sprintf("%d", c.stackMax)
-	return strings.ReplaceAll(c.sb.String(), "$stackMax", stackMax)
+	s = strings.ReplaceAll(s, "$stackMax", stackMax)
+	for label, _ := range c.usedLabels {
+		_l := fmt.Sprintf("_l%d:", label)
+		s = strings.ReplaceAll(s, "/*"+_l+"*/", _l)
+	}
+	return s
 }
 
 func (c *internalFuncCompiler) genLocals(paramCount int) {
