@@ -11,8 +11,10 @@ type moduleCompiler struct {
 
 func (c *moduleCompiler) compile() {
 	c.genModule()
-	c.genNew()
 	c.genDummy()
+	c.genNew()
+	c.println("")
+	c.genMemInit()
 	c.println("")
 	c.genExternalFuncs()
 	c.genInternalFuncs()
@@ -45,6 +47,17 @@ type aotModule struct {
 	table         instance.Table
 	memory        instance.Memory
 	globals       []instance.Global
+}
+`)
+}
+
+func (c *moduleCompiler) genDummy() {
+	c.print(`
+// TODO
+func dummy() {
+	_ = bits.Add
+	_ = binary.Decode
+	_ = interpreter.NewInstance
 }
 `)
 }
@@ -88,18 +101,33 @@ func Instantiate(iMap instance.Map) (instance.Instance, error) {
 			len(c.importedGlobals)+i, g.Type.ValType, g.Type.Mut == 1, 0) // TODO
 	}
 
+	c.println("	m.initMem()")
 	c.println("	return m, nil // TODO\n}")
 }
 
-func (c *moduleCompiler) genDummy() {
-	c.print(`
-// TODO
-func dummy() {
-	_ = bits.Add
-	_ = binary.Decode
-	_ = interpreter.NewInstance
+func (c *moduleCompiler) genMemInit() {
+	c.println("func (m *aotModule) initMem() {")
+	for _, data := range c.module.DataSec {
+		if len(data.Init) > 0 {
+			offset := getOffset(data.Offset)
+			c.printf("	m.memory.Write(%d, []byte(%q))\n",
+				offset, data.Init)
+		}
+	}
+	c.println("}")
 }
-`)
+
+func getOffset(constExpr []binary.Instruction) int {
+	if len(constExpr) == 0 {
+		return 0
+	}
+	instr := constExpr[len(constExpr)-1]
+	switch instr.Opcode {
+	case binary.I32Const:
+		return int(instr.Args.(int32))
+	default:
+		panic("TODO")
+	}
 }
 
 func (c *moduleCompiler) genExternalFuncs() {
