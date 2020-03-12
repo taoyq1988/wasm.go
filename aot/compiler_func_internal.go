@@ -101,7 +101,7 @@ func genLocals(paramCount, stackMax int) string {
 		p.printIf(i > paramCount, ", ", "")
 		p.printf("l%d", i)
 	}
-	p.println(" uint64")
+	p.print(" uint64")
 	return p.sb.String()
 }
 
