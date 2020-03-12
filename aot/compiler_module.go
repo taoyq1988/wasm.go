@@ -27,6 +27,7 @@ func (c *moduleCompiler) genModule() {
 package main
 
 import (
+	gobin "encoding/binary"
 	"math"
 	"math/bits"
 
@@ -34,6 +35,8 @@ import (
 	"github.com/zxh0/wasm.go/instance"
 	"github.com/zxh0/wasm.go/interpreter"
 )
+
+var LE = gobin.LittleEndian
 
 type aotModule struct {
 	importedFuncs []instance.Function

@@ -150,39 +150,39 @@ func (c *internalFuncCompiler) emitInstr(instr binary.Instruction) {
 		c.printf("m.globals[%d] = stack[%d] // %s %d\n",
 			instr.Args, c.stackPop(), opname, instr.Args)
 	case binary.I32Load, binary.F32Load:
-		c.emitLoad(instr, opname, "stack[%d] = binary.LittleEndian.Uint32(m.memory[stack[%d] + %d:]) // %s\n")
+		c.emitLoad(instr, opname, "stack[%d] = LE.Uint32(m.memory[stack[%d] + %d:]) // %s\n")
 	case binary.I64Load, binary.F64Load:
-		c.emitLoad(instr, opname, "stack[%d] = binary.LittleEndian.Uint64(m.memory[stack[%d] + %d:]) // %s\n")
+		c.emitLoad(instr, opname, "stack[%d] = LE.Uint64(m.memory[stack[%d] + %d:]) // %s\n")
 	case binary.I32Load8S:
 		c.emitLoad(instr, opname, "stack[%d] = uint32(int32(int8(m.memory[stack[%d] + %d:]))) // %s\n")
 	case binary.I32Load8U:
 		c.emitLoad(instr, opname, "stack[%d] = uint32(m.memory[stack[%d] + %d:]) // %s\n")
 	case binary.I32Load16S:
-		c.emitLoad(instr, opname, "stack[%d] = uint32(int32(int16(binary.LittleEndian.Uint16(m.memory[stack[%d] + %d:])))) // %s\n")
+		c.emitLoad(instr, opname, "stack[%d] = uint32(int32(int16(LE.Uint16(m.memory[stack[%d] + %d:])))) // %s\n")
 	case binary.I32Load16U:
-		c.emitLoad(instr, opname, "stack[%d] = uint32(binary.LittleEndian.Uint16(m.memory[stack[%d] + %d:])) // %s\n")
+		c.emitLoad(instr, opname, "stack[%d] = uint32(LE.Uint16(m.memory[stack[%d] + %d:])) // %s\n")
 	case binary.I64Load8S:
 		c.emitLoad(instr, opname, "stack[%d] = uint64(int64(int8(m.memory[stack[%d] + %d:]))) // %s\n")
 	case binary.I64Load8U:
 		c.emitLoad(instr, opname, "stack[%d] = uint64(m.memory[stack[%d] + %d:]) // %s\n")
 	case binary.I64Load16S:
-		c.emitLoad(instr, opname, "stack[%d] = uint64(int64(int16(binary.LittleEndian.Uint16(m.memory[stack[%d] + %d:])))) // %s\n")
+		c.emitLoad(instr, opname, "stack[%d] = uint64(int64(int16(LE.Uint16(m.memory[stack[%d] + %d:])))) // %s\n")
 	case binary.I64Load16U:
-		c.emitLoad(instr, opname, "stack[%d] = uint64(binary.LittleEndian.Uint16(m.memory[stack[%d] + %d:])) // %s\n")
+		c.emitLoad(instr, opname, "stack[%d] = uint64(LE.Uint16(m.memory[stack[%d] + %d:])) // %s\n")
 	case binary.I64Load32S:
-		c.emitLoad(instr, opname, "stack[%d] = uint64(int64(int32(binary.LittleEndian.Uint32(m.memory[stack[%d] + %d:])))) // %s\n")
+		c.emitLoad(instr, opname, "stack[%d] = uint64(int64(int32(LE.Uint32(m.memory[stack[%d] + %d:])))) // %s\n")
 	case binary.I64Load32U:
-		c.emitLoad(instr, opname, "stack[%d] = uint64(binary.LittleEndian.Uint32(m.memory[stack[%d] + %d:])) // %s\n")
+		c.emitLoad(instr, opname, "stack[%d] = uint64(LE.Uint32(m.memory[stack[%d] + %d:])) // %s\n")
 	case binary.I32Store, binary.F32Store:
-		c.emitStore(instr, opname, "binary.LittleEndian.PutUint32(m.memory[stack[%d] + %d:], uint32(stack[%d])) // %s\n")
+		c.emitStore(instr, opname, "LE.PutUint32(m.memory[stack[%d] + %d:], uint32(stack[%d])) // %s\n")
 	case binary.I64Store, binary.F64Store:
-		c.emitStore(instr, opname, "binary.LittleEndian.PutUint64(m.memory[stack[%d] + %d:], stack[%d]) // %s\n")
+		c.emitStore(instr, opname, "LE.PutUint64(m.memory[stack[%d] + %d:], stack[%d]) // %s\n")
 	case binary.I32Store8, binary.I64Store8:
 		c.emitStore(instr, opname, "m.memory[stack[%d] + %d:] = byte(stack[%d]) // %s\n")
 	case binary.I32Store16, binary.I64Store16:
-		c.emitStore(instr, opname, "binary.LittleEndian.PutUint16(m.memory[stack[%d] + %d:], uint16(stack[%d])) // %s\n")
+		c.emitStore(instr, opname, "LE.PutUint16(m.memory[stack[%d] + %d:], uint16(stack[%d])) // %s\n")
 	case binary.I64Store32:
-		c.emitStore(instr, opname, "binary.LittleEndian.PutUint32(m.memory[stack[%d] + %d:], uint32(stack[%d])) // %s\n")
+		c.emitStore(instr, opname, "LE.PutUint32(m.memory[stack[%d] + %d:], uint32(stack[%d])) // %s\n")
 	case binary.MemorySize:
 		c.emitMemSize(opname)
 	case binary.MemoryGrow:
@@ -585,11 +585,11 @@ func (c *internalFuncCompiler) emitCallIndirect() {
 }
 
 func (c *internalFuncCompiler) emitLoad(instr binary.Instruction, opname, tmpl string) {
-	// tmpl = stack[%d] = binary.LittleEndian.Uint32(m.memory[stack[%d] + %d:]) // %s\n"
+	// tmpl = stack[%d] = LE.Uint32(m.memory[stack[%d] + %d:]) // %s\n"
 	c.printf(tmpl, c.stackPtr-1, c.stackPtr-1, instr.Args.(binary.MemArg).Offset, opname)
 }
 func (c *internalFuncCompiler) emitStore(instr binary.Instruction, opname, tmpl string) {
-	// tmpl = "binary.LittleEndian.PutUint32(m.memory[stack[%d] + %d:], uint32(stack[%d])) // %s\n"
+	// tmpl = "LE.PutUint32(m.memory[stack[%d] + %d:], uint32(stack[%d])) // %s\n"
 	c.printf(tmpl, c.stackPtr-2, instr.Args.(binary.MemArg).Offset, c.stackPtr-1, opname)
 	c.stackPtr -= 2
 }
