@@ -542,19 +542,18 @@ func (c *internalFuncCompiler) emitLoop(blockArgs binary.BlockArgs) {
 }
 
 /*
-if <cond> {
-	l0: for {
-		... // break
-		break
-	}
-} else {
-	l0: for {
-		... // break
-		break
+l0: for {
+	if <cond> {
+		...
+	} else {
+		...
 	}
 }
 */
 func (c *internalFuncCompiler) emitIf(ifArgs binary.IfArgs) {
+	c.printIndents()
+	c.printf("/*_l%d:*/ for {\n", c.blockDepth()-1)
+
 	c.printIndents()
 	c.printf("if l%d > 0 {\n", c.stackPtr-1)
 	c.stackPop()
@@ -566,6 +565,10 @@ func (c *internalFuncCompiler) emitIf(ifArgs binary.IfArgs) {
 	}
 	c.printIndents()
 	c.println("}")
+
+	c.printIndents()
+	c.printf("break } // end of _l%d\n", c.blockDepth()-1)
+	c.exitBlock()
 }
 
 func (c *internalFuncCompiler) emitBr(labelIdx uint32) {
