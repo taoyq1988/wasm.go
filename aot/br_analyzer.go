@@ -2,12 +2,8 @@ package aot
 
 import "github.com/zxh0/wasm.go/binary"
 
-type BlockArgs2 struct {
-	binary.BlockArgs
-}
-
-type IfArgs struct {
-	binary.IfArgs
+type brInfo struct {
+	x []brInfo
 }
 
 func analyzeBr(code binary.Code) {
