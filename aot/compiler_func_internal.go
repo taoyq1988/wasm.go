@@ -48,6 +48,9 @@ func (c *internalFuncCompiler) stackPop() int {
 	c.stackPtr--
 	return c.stackPtr + 1
 }
+func (c *internalFuncCompiler) stackTop() int {
+	return c.stackPtr - 1
+}
 
 func (c *internalFuncCompiler) enterBlock(isLoop, hasResult bool) {
 	c.blocks = append(c.blocks, blockInfo{
@@ -534,24 +537,37 @@ l0: for {
 	break
 }
 */
-func (c *internalFuncCompiler) emitLoop(expr []binary.Instruction, hasResult bool) {
-	c.emitBlock(expr, true, hasResult)
+func (c *internalFuncCompiler) emitLoop(blockArgs binary.BlockArgs) {
+	c.emitBlock(blockArgs.Instrs, true, len(blockArgs.RT) > 0)
 }
 
 /*
-l0: for {
-	if <cond> {
-		...
+if <cond> {
+	l0: for {
+		... // break
 		break
-	} else {
-		...
+	}
+} else {
+	l0: for {
+		... // break
 		break
 	}
 }
 */
-func (c *internalFuncCompiler) emitIf() {
-	panic("TODO")
+func (c *internalFuncCompiler) emitIf(ifArgs binary.IfArgs) {
+	c.printIndents()
+	c.printf("if l%d > 0 {\n", c.stackPtr-1)
+	c.stackPop()
+	c.emitBlock(ifArgs.Instrs1, false, len(ifArgs.RT) > 0)
+	if len(ifArgs.Instrs2) > 0 {
+		c.printIndents()
+		c.println("} else {")
+		c.emitBlock(ifArgs.Instrs2, false, len(ifArgs.RT) > 0)
+	}
+	c.printIndents()
+	c.println("}")
 }
+
 func (c *internalFuncCompiler) emitBr(labelIdx uint32) {
 	n := len(c.blocks) - int(labelIdx) - 1
 	c.usedLabels[n] = true
