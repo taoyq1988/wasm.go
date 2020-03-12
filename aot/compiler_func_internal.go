@@ -266,13 +266,13 @@ func (c *internalFuncCompiler) emitInstr(instr binary.Instruction) {
 	case binary.F64Ge:
 		c.emitF64BinCmp(">=", opname)
 	case binary.I32Clz:
-		c.printf("stack[%d] = uint64(bits.LeadingZeros32(stack[%d])) // %s\n",
+		c.printf("stack[%d] = uint64(bits.LeadingZeros32(uint32(stack[%d]))) // %s\n",
 			c.stackPtr-1, c.stackPtr-1, opname)
 	case binary.I32Ctz:
-		c.printf("stack[%d] = uint64(bits.TrailingZeros32(stack[%d])) // %s\n",
+		c.printf("stack[%d] = uint64(bits.TrailingZeros32(uint32(stack[%d]))) // %s\n",
 			c.stackPtr-1, c.stackPtr-1, opname)
 	case binary.I32PopCnt:
-		c.printf("stack[%d] = uint64(bits.OnesCount32(stack[%d])) // %s\n",
+		c.printf("stack[%d] = uint64(bits.OnesCount32(uint32(stack[%d]))) // %s\n",
 			c.stackPtr-1, c.stackPtr-1, opname)
 	case binary.I32Add:
 		c.emitI32BinArithU("+", opname)
@@ -307,11 +307,11 @@ func (c *internalFuncCompiler) emitInstr(instr binary.Instruction) {
 			c.stackPtr-2, c.stackPtr-2, c.stackPtr-1, opname)
 		c.stackPop()
 	case binary.I32Rotl:
-		c.printf("stack[%d] = bits.RotateLeft32(uint32(stack[%d]), int(uint32(stack[%d]))) // %s\n",
+		c.printf("stack[%d] = uint64(bits.RotateLeft32(uint32(stack[%d]), int(uint32(stack[%d])))) // %s\n",
 			c.stackPtr-2, c.stackPtr-2, c.stackPtr-1, opname)
 		c.stackPop()
 	case binary.I32Rotr:
-		c.printf("stack[%d] = bits.RotateLeft32(uint32(stack[%d]), -int(uint32(stack[%d]))) // %s\n",
+		c.printf("stack[%d] = uint64(bits.RotateLeft32(uint32(stack[%d]), -int(uint32(stack[%d])))) // %s\n",
 			c.stackPtr-2, c.stackPtr-2, c.stackPtr-1, opname)
 		c.stackPop()
 	case binary.I64Clz:

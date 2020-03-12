@@ -28,6 +28,7 @@ package main
 
 import (
 	"math"
+	"math/bits"
 
 	"github.com/zxh0/wasm.go/binary"
 	"github.com/zxh0/wasm.go/instance"
@@ -92,7 +93,9 @@ func Instantiate(iMap instance.Map) (instance.Instance, error) {
 
 func (c *moduleCompiler) genDummy() {
 	c.print(`
+// TODO
 func dummy() {
+	_ = bits.Add
 	_ = binary.Decode
 	_ = interpreter.NewInstance
 }
