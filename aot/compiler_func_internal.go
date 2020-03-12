@@ -78,13 +78,15 @@ func (c *internalFuncCompiler) compile(idx int,
 	c.print(")")
 	c.genResults(resultCount)
 	c.print(" {\n")
-	c.genLocals(paramCount, localCount)
+	c.println("	// var ... uint64")
 	c.genFuncBody(code, resultCount)
 	c.println("}")
 
 	s := c.sb.String()
-	stackMax := fmt.Sprintf("%d", c.stackMax)
-	s = strings.ReplaceAll(s, "$stackMax", stackMax)
+	if c.stackMax > paramCount {
+		s = strings.ReplaceAll(s, "// var ... uint64",
+			genLocals(paramCount, c.stackMax))
+	}
 	for label, _ := range c.usedLabels {
 		_l := fmt.Sprintf("_l%d:", label)
 		s = strings.ReplaceAll(s, "/*"+_l+"*/", _l)
@@ -92,16 +94,17 @@ func (c *internalFuncCompiler) compile(idx int,
 	return s
 }
 
-func (c *internalFuncCompiler) genLocals(paramCount, localCount int) {
-	if localCount > 0 {
-		c.print("	var ")
-		for i := 0; i < localCount; i++ {
-			c.printIf(i > 0, ", ", "")
-			c.printf("l%d, ", paramCount+i)
-		}
-		c.println(" uint64")
+func genLocals(paramCount, stackMax int) string {
+	p := newPrinter()
+	p.print("var ")
+	for i := paramCount; i < stackMax; i++ {
+		p.printIf(i > paramCount, ", ", "")
+		p.printf("l%d", i)
 	}
+	p.println(" uint64")
+	return p.sb.String()
 }
+
 func (c *internalFuncCompiler) genFuncBody(code binary.Code, resultCount int) {
 	c.emitBlock(code.Expr, false, resultCount > 0)
 	if resultCount > 0 {
