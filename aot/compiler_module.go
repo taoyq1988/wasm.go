@@ -64,28 +64,23 @@ func Instantiate(iMap instance.Map) (instance.Instance, error) {
 		c.printf(`	m.table = iMap["%s"].Get("%s").(instance.Table)%s`,
 			c.importedTables[0].Module, c.importedTables[0].Name, "\n")
 	} else if len(c.module.TableSec) > 0 {
-		tt := c.module.TableSec[0]
-		c.printf("	mt := binary.TableType{ElemType:0x70, Limits{Min: %d, Max: %d}}\n",
-			tt.Limits.Min, tt.Limits.Max)
-		c.println("	m.table = interpreter.NewTable(mt)")
+		c.printf("	m.table = interpreter.NewTable(%d, %d)\n",
+			c.module.TableSec[0].Limits.Min, c.module.TableSec[0].Limits.Max)
 	}
 	if len(c.importedMemories) > 0 {
 		c.printf(`	m.memory = iMap["%s"].Get("%s").(instance.Memory)%s`,
 			c.importedTables[0].Module, c.importedTables[0].Name, "\n")
 	} else if len(c.module.MemSec) > 0 {
-		mt := c.module.MemSec[0]
-		c.printf("	mt := binary.Limits{Min: %d, Max: %d}\n", mt.Min, mt.Max)
-		c.println("	m.memory = interpreter.NewMemory(mt)")
+		c.printf("	m.memory = interpreter.NewMemory(%d, %d)\n",
+			c.module.MemSec[0].Min, c.module.MemSec[0].Max)
 	}
 	for i, imp := range c.importedGlobals {
 		c.printf(`	m.globals[%d] = iMap["%s"].Get("%s").(instance.Global)%s`,
 			i, imp.Module, imp.Name, "\n")
 	}
 	for i, g := range c.module.GlobalSec {
-		c.printf("	gt := binary.GlobalType{ValType: %d, Mut:%d}\n",
-			g.Type.ValType, g.Type.Mut)
-		c.printf("	m.globals[%d] = interpreter.NewGlobal()\n",
-			len(c.importedGlobals)+i)
+		c.printf("	m.globals[%d] = interpreter.NewGlobal(%d, %t, %d)\n",
+			len(c.importedGlobals)+i, g.Type.ValType, g.Type.Mut == 1, 0) // TODO
 	}
 
 	c.println("	return m, nil // TODO\n}")
