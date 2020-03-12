@@ -117,14 +117,15 @@ func (c *internalFuncCompiler) emitInstr(instr binary.Instruction) {
 	c.printIndents()
 	switch instr.Opcode {
 	case binary.Unreachable:
-		c.printf(`panic("TODO") // %s\n`, opname) // TODO
+		c.printf(`panic("unreachable") // %s\n`, opname) // TODO
 	case binary.Nop:
 		c.printf("// %s\n", opname)
 	case binary.Block:
 		blockArgs := instr.Args.(binary.BlockArgs)
 		c.emitBlock(blockArgs.Instrs, false, len(blockArgs.RT) > 0)
 	case binary.Loop:
-		c.emitLoop()
+		blockArgs := instr.Args.(binary.BlockArgs)
+		c.emitBlock(blockArgs.Instrs, true, len(blockArgs.RT) > 0)
 	case binary.If:
 		c.emitIf()
 	case binary.Br:
@@ -533,8 +534,8 @@ l0: for {
 	break
 }
 */
-func (c *internalFuncCompiler) emitLoop() {
-	panic("TODO")
+func (c *internalFuncCompiler) emitLoop(expr []binary.Instruction, hasResult bool) {
+	c.emitBlock(expr, true, hasResult)
 }
 
 /*
