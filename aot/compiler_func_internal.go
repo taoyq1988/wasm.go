@@ -130,7 +130,7 @@ func (c *internalFuncCompiler) emitInstr(instr binary.Instruction) {
 		blockArgs := instr.Args.(binary.BlockArgs)
 		c.emitBlock(blockArgs.Instrs, true, len(blockArgs.RT) > 0)
 	case binary.If:
-		c.emitIf()
+		c.emitIf(instr.Args.(binary.IfArgs))
 	case binary.Br:
 		c.emitBr(instr.Args.(uint32))
 	case binary.BrIf:
