@@ -26,14 +26,29 @@ func analyzerExpr(depth uint32, expr binary.Expr) (targets []uint32) {
 		case binary.Block:
 			args := instr.Args.(binary.BlockArgs)
 			targets = analyzerExpr(depth+1, args.Instrs)
+			for _, target := range targets {
+				if target == depth+1 {
+					// TODO
+				}
+			}
 		case binary.Loop:
 			args := instr.Args.(binary.BlockArgs)
 			targets = analyzerExpr(depth+1, args.Instrs)
+			for _, target := range targets {
+				if target == depth+1 {
+					// TODO
+				}
+			}
 		case binary.If:
 			args := instr.Args.(binary.IfArgs)
 			targets = analyzerExpr(depth+1, args.Instrs1)
 			targets2 := analyzerExpr(depth+1, args.Instrs2)
 			targets = append(targets, targets2...)
+			for _, target := range targets {
+				if target == depth+1 {
+					// TODO
+				}
+			}
 		case binary.Br:
 			targets = []uint32{depth - instr.Args.(uint32)}
 		case binary.BrIf:
