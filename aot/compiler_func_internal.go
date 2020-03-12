@@ -145,7 +145,8 @@ func (c *internalFuncCompiler) emitInstr(instr binary.Instruction) {
 			c.stackPush(), instr.Args, opname, instr.Args)
 	case binary.LocalSet:
 		c.printf("stack[%d] = stack[%d] // %s %d\n",
-			instr.Args, c.stackPop(), opname, instr.Args)
+			instr.Args, c.stackPtr, opname, instr.Args)
+		c.stackPtr--
 	case binary.LocalTee:
 		c.printf("stack[%d] = stack[%d] // %s %d\n",
 			instr.Args, c.stackPtr-1, opname, instr.Args)
@@ -154,7 +155,8 @@ func (c *internalFuncCompiler) emitInstr(instr binary.Instruction) {
 			c.stackPush(), instr.Args, opname, instr.Args)
 	case binary.GlobalSet:
 		c.printf("m.globals[%d].Set(stack[%d]) // %s %d\n",
-			instr.Args, c.stackPop(), opname, instr.Args)
+			instr.Args, c.stackPtr, opname, instr.Args)
+		c.stackPtr--
 	case binary.I32Load, binary.F32Load:
 		c.emitLoad(instr, opname, "stack[%d] = uint64(m.readU32(stack[%d] + %d)) // %s\n")
 	case binary.I64Load, binary.F64Load:
