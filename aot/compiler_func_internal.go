@@ -585,7 +585,7 @@ func (c *internalFuncCompiler) emitIf(ifArgs binary.IfArgs) {
 		c.emitInstr(instr)
 	}
 	c.printIndentsPlus(-1)
-	c.println("}")
+	c.println("} // end if")
 
 	c.exitBlock()
 	if isBrTarget(ifArgs.Instrs1) {
