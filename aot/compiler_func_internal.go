@@ -30,12 +30,12 @@ func newInternalFuncCompiler(moduleInfo moduleInfo) *internalFuncCompiler {
 
 func (c *internalFuncCompiler) printIndentsPlus(n int) {
 	for i := len(c.blocks) + n; i > 0; i-- {
-		c.sb.WriteByte('\t')
+		c.print("\t")
 	}
 }
 func (c *internalFuncCompiler) printIndents() {
 	for i := len(c.blocks); i > 0; i-- {
-		c.sb.WriteByte('\t')
+		c.print("\t")
 	}
 }
 
@@ -118,6 +118,7 @@ func (c *internalFuncCompiler) emitInstr(instr binary.Instruction) {
 	switch instr.Opcode {
 	case binary.Block, binary.Loop, binary.If:
 	case binary.BrTable:
+	case 0xFF:
 	default:
 		c.printIndents()
 	}
