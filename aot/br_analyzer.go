@@ -2,37 +2,21 @@ package aot
 
 import "github.com/zxh0/wasm.go/binary"
 
-type brInfo struct {
-	x []brInfo
-}
-
 func analyzeBr(code binary.Code) {
-	for _, instr := range code.Expr {
-		switch instr.Opcode {
-		case binary.Block:
-		case binary.Loop:
-		case binary.If:
-		}
-	}
+	analyzerExpr(0, code.Expr)
 }
 
 func analyzerExpr(depth uint32, expr binary.Expr) (targets []uint32) {
-	for _, instr := range expr {
+	for i, instr := range expr {
 		switch instr.Opcode {
-		case binary.Block:
+		case binary.Block, binary.Loop:
 			args := instr.Args.(binary.BlockArgs)
 			targets = analyzerExpr(depth+1, args.Instrs)
 			for _, target := range targets {
 				if target == depth+1 {
-					// TODO
-				}
-			}
-		case binary.Loop:
-			args := instr.Args.(binary.BlockArgs)
-			targets = analyzerExpr(depth+1, args.Instrs)
-			for _, target := range targets {
-				if target == depth+1 {
-					// TODO
+					args.Instrs = append(args.Instrs, binary.Instruction{Opcode: 0xFF})
+					expr[i].Args = args // hack!
+					break
 				}
 			}
 		case binary.If:
@@ -42,7 +26,9 @@ func analyzerExpr(depth uint32, expr binary.Expr) (targets []uint32) {
 			targets = append(targets, targets2...)
 			for _, target := range targets {
 				if target == depth+1 {
-					// TODO
+					args.Instrs1 = append(args.Instrs1, binary.Instruction{Opcode: 0xFF})
+					expr[i].Args = args // hack!
+					break
 				}
 			}
 		case binary.Br:

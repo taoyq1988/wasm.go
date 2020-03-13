@@ -116,7 +116,7 @@ func (c *internalFuncCompiler) genFuncBody(code binary.Code, resultCount int) {
 }
 
 func (c *internalFuncCompiler) emitInstr(instr binary.Instruction) {
-	opname := instr.String()
+	opname := instr.GetOpname()
 	c.printIndents()
 	switch instr.Opcode {
 	case binary.Unreachable:
@@ -509,7 +509,7 @@ func (c *internalFuncCompiler) emitInstr(instr binary.Instruction) {
 	case binary.F64ReinterpretI64:
 		c.printf("// %s\n", opname) // TODO
 	default:
-		c.printf("// %s ???", opname)
+		c.printf("// 0x%X ???\n", instr.Opcode)
 	}
 }
 
