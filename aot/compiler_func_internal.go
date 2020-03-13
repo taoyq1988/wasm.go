@@ -13,7 +13,6 @@ type internalFuncCompiler struct {
 	stackPtr   int
 	stackMax   int
 	blocks     []blockInfo
-	usedLabels map[int]bool
 }
 
 type blockInfo struct {
@@ -26,7 +25,6 @@ func newInternalFuncCompiler(moduleInfo moduleInfo) *internalFuncCompiler {
 	return &internalFuncCompiler{
 		funcCompiler: newFuncCompiler(),
 		moduleInfo:   moduleInfo,
-		usedLabels:   map[int]bool{},
 	}
 }
 
@@ -95,10 +93,6 @@ func (c *internalFuncCompiler) compile(idx int,
 		s = strings.ReplaceAll(s, "// var ... uint64",
 			genLocals(paramCount, c.stackMax))
 	}
-	//for label, _ := range c.usedLabels {
-	//	_l := fmt.Sprintf("_l%d:", label)
-	//	s = strings.ReplaceAll(s, "/*"+_l+"*/", _l)
-	//}
 	return s
 }
 
@@ -533,7 +527,7 @@ l0: for {
 func (c *internalFuncCompiler) emitBlock(expr []binary.Instruction, isLoop, hasResult bool) {
 	if isBrTarget(expr) {
 		c.printIndents()
-		c.printf("_l%d: for {\n", c.blockDepth()-1)
+		c.printf("_l%d: for {\n", c.blockDepth())
 	}
 	c.enterBlock(isLoop, hasResult)
 	for _, instr := range expr {
@@ -544,7 +538,7 @@ func (c *internalFuncCompiler) emitBlock(expr []binary.Instruction, isLoop, hasR
 		c.printIndentsPlus(-1)
 		c.println("break")
 		c.printIndents()
-		c.printf("} // end of _l%d\n", c.blockDepth()-1)
+		c.printf("} // end of _l%d\n", c.blockDepth())
 	}
 }
 
@@ -601,7 +595,6 @@ func (c *internalFuncCompiler) emitIf(ifArgs binary.IfArgs) {
 
 func (c *internalFuncCompiler) emitBr(labelIdx uint32) {
 	n := len(c.blocks) - int(labelIdx) - 1
-	c.usedLabels[n] = true
 	if c.blocks[n].isLoop {
 		c.printf("continue _l%d // br\n", n)
 	} else {
@@ -610,14 +603,12 @@ func (c *internalFuncCompiler) emitBr(labelIdx uint32) {
 }
 func (c *internalFuncCompiler) emitBrIf(labelIdx uint32) {
 	n := len(c.blocks) - int(labelIdx) - 1
-	c.usedLabels[n] = true
-	ret := "" // TODO: return
 	br := "break"
 	if c.blocks[n].isLoop {
 		br = "continue"
 	}
-	c.printf("if l%d != 0 { %s%s _l%d } // br_if %d\n",
-		c.stackPtr-1, ret, br, n, labelIdx)
+	c.printf("if l%d != 0 { %s _l%d } // br_if %d\n",
+		c.stackPtr-1, br, n, labelIdx)
 	c.stackPop()
 }
 func (c *internalFuncCompiler) emitBrTable() {

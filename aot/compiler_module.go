@@ -21,9 +21,7 @@ func (c *moduleCompiler) compile() {
 	c.genExternalFuncs()
 	c.genInternalFuncs()
 	c.genExportedFuncs()
-	c.genGet()
-	c.genGetGlobalVal()
-	c.genCallFunc()
+	c.genInstanceImpl()
 	c.genUtils()
 }
 
@@ -169,19 +167,23 @@ func (c *moduleCompiler) genExportedFuncs() {
 	}
 }
 
+func (c *moduleCompiler) genInstanceImpl() {
+	c.genGet()
+	c.genGetGlobalVal()
+	c.genCallFunc()
+}
+
 func (c *moduleCompiler) genGet() {
-	c.print(`
+	c.print(`// instance.Instance
 func (m *aotModule) Get(name string) interface{} {
 	panic("TODO")
-}
-`)
+}`)
 }
 func (c *moduleCompiler) genGetGlobalVal() {
 	c.print(`
 func (m *aotModule) GetGlobalValue(name string) (interface{}, error) {
 	panic("TODO")
-}
-`)
+}`)
 }
 func (c *moduleCompiler) genCallFunc() {
 	c.println("")
@@ -197,6 +199,7 @@ func (c *moduleCompiler) genCallFunc() {
 
 func (c *moduleCompiler) genUtils() {
 	c.print(`
+// memory read
 func (m *aotModule) readU8(offset uint64) byte {
 	var buf [1]byte
 	m.memory.Read(offset, buf[:])
@@ -218,6 +221,7 @@ func (m *aotModule) readU64(offset uint64) uint64 {
 	return LE.Uint64(buf[:])
 }
 
+// memory write
 func (m *aotModule) writeU8(offset uint64, n byte) {
 	var buf [1]byte
 	buf[0] = n
