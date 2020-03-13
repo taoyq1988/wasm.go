@@ -30,6 +30,11 @@ func newInternalFuncCompiler(moduleInfo moduleInfo) *internalFuncCompiler {
 	}
 }
 
+func (c *internalFuncCompiler) printIndentsPlus(n int) {
+	for i := len(c.blocks) + n; i > 0; i-- {
+		c.sb.WriteByte('\t')
+	}
+}
 func (c *internalFuncCompiler) printIndents() {
 	for i := len(c.blocks); i > 0; i-- {
 		c.sb.WriteByte('\t')
@@ -116,8 +121,13 @@ func (c *internalFuncCompiler) genFuncBody(code binary.Code, resultCount int) {
 }
 
 func (c *internalFuncCompiler) emitInstr(instr binary.Instruction) {
+	switch instr.Opcode {
+	case binary.Block, binary.Loop, binary.If:
+	default:
+		c.printIndents()
+	}
+
 	opname := instr.GetOpname()
-	c.printIndents()
 	switch instr.Opcode {
 	case binary.Unreachable:
 		c.printf(`panic("unreachable") // %s\n`, opname) // TODO
@@ -561,20 +571,20 @@ func (c *internalFuncCompiler) emitIf(ifArgs binary.IfArgs) {
 	}
 	c.enterBlock(false, len(ifArgs.RT) > 0)
 
-	c.printIndents()
+	c.printIndentsPlus(-1)
 	c.printf("if l%d > 0 {\n", c.stackPtr-1)
 	c.stackPop()
 	for _, instr := range ifArgs.Instrs1 {
 		c.emitInstr(instr)
 	}
 	if len(ifArgs.Instrs2) > 0 {
-		c.printIndents()
+		c.printIndentsPlus(-1)
 		c.println("} else {")
 	}
 	for _, instr := range ifArgs.Instrs2 {
 		c.emitInstr(instr)
 	}
-	c.printIndents()
+	c.printIndentsPlus(-1)
 	c.println("}")
 
 	c.exitBlock()
