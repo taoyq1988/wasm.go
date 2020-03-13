@@ -572,7 +572,7 @@ func (c *internalFuncCompiler) emitIf(ifArgs binary.IfArgs) {
 	c.enterBlock(false, len(ifArgs.RT) > 0)
 
 	c.printIndentsPlus(-1)
-	c.printf("if l%d > 0 {\n", c.stackPtr-1)
+	c.printf("if l%d > 0 { // if@%d\n", c.stackPtr-1, len(c.blocks)-1)
 	c.stackPop()
 	for _, instr := range ifArgs.Instrs1 {
 		c.emitInstr(instr)
@@ -585,7 +585,7 @@ func (c *internalFuncCompiler) emitIf(ifArgs binary.IfArgs) {
 		c.emitInstr(instr)
 	}
 	c.printIndentsPlus(-1)
-	c.println("} // end if")
+	c.printf("} // end if@%d\n", len(c.blocks)-1)
 
 	c.exitBlock()
 	if isBrTarget(ifArgs.Instrs1) {
