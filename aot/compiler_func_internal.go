@@ -1,7 +1,6 @@
 package aot
 
 import (
-	"fmt"
 	"math"
 	"strings"
 
@@ -91,10 +90,10 @@ func (c *internalFuncCompiler) compile(idx int,
 		s = strings.ReplaceAll(s, "// var ... uint64",
 			genLocals(paramCount, c.stackMax))
 	}
-	for label, _ := range c.usedLabels {
-		_l := fmt.Sprintf("_l%d:", label)
-		s = strings.ReplaceAll(s, "/*"+_l+"*/", _l)
-	}
+	//for label, _ := range c.usedLabels {
+	//	_l := fmt.Sprintf("_l%d:", label)
+	//	s = strings.ReplaceAll(s, "/*"+_l+"*/", _l)
+	//}
 	return s
 }
 
@@ -522,13 +521,17 @@ l0: for {
 */
 func (c *internalFuncCompiler) emitBlock(expr []binary.Instruction, isLoop, hasResult bool) {
 	c.enterBlock(isLoop, hasResult)
-	c.printIndents()
-	c.printf("/*_l%d:*/ for {\n", c.blockDepth()-1)
+	if isBrTarget(expr) {
+		c.printIndents()
+		c.printf("_l%d: for {\n", c.blockDepth()-1)
+	}
 	for _, instr := range expr {
 		c.emitInstr(instr)
 	}
-	c.printIndents()
-	c.printf("break } // end of _l%d\n", c.blockDepth()-1)
+	if isBrTarget(expr) {
+		c.printIndents()
+		c.printf("break } // end of _l%d\n", c.blockDepth()-1)
+	}
 	c.exitBlock()
 }
 
