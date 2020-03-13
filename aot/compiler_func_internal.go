@@ -574,9 +574,11 @@ func (c *internalFuncCompiler) emitIf(ifArgs binary.IfArgs) {
 	c.printIndentsPlus(-1)
 	c.printf("if l%d > 0 { // if@%d\n", c.stackPtr-1, len(c.blocks)-1)
 	c.stackPop()
+	stackPtr := c.stackPtr
 	for _, instr := range ifArgs.Instrs1 {
 		c.emitInstr(instr)
 	}
+	c.stackPtr = stackPtr
 	if len(ifArgs.Instrs2) > 0 {
 		c.printIndentsPlus(-1)
 		c.println("} else {")
