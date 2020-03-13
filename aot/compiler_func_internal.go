@@ -526,9 +526,11 @@ l0: for {
 }
 */
 func (c *internalFuncCompiler) emitBlock(expr []binary.Instruction, isLoop, hasResult bool) {
+	c.printIndents()
 	if isBrTarget(expr) {
-		c.printIndents()
 		c.printf("_l%d: for {\n", c.blockDepth())
+	} else {
+		c.printf("{ // _l%d\n", c.blockDepth())
 	}
 	c.enterBlock(isLoop, hasResult)
 	for _, instr := range expr {
@@ -540,6 +542,9 @@ func (c *internalFuncCompiler) emitBlock(expr []binary.Instruction, isLoop, hasR
 		c.printf("break // _l%d\n", c.blockDepth())
 		c.printIndents()
 		c.printf("} // end of _l%d\n", c.blockDepth())
+	}  else {
+		c.printIndents()
+		c.println("}")
 	}
 }
 
