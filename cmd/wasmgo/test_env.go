@@ -15,6 +15,7 @@ func newTestEnv() instance.Instance {
 	env.RegisterFunc("assert_eq_i64", assertEqI64, binary.ValTypeI64, binary.ValTypeI64)
 	env.RegisterFunc("assert_eq_f32", assertEqF32, binary.ValTypeF32, binary.ValTypeF32)
 	env.RegisterFunc("assert_eq_f64", assertEqF64, binary.ValTypeF64, binary.ValTypeF64)
+	env.RegisterFunc("print_i32", printI32, binary.ValTypeI32)
 	return env
 }
 
@@ -59,4 +60,9 @@ func assertEqF64(args ...interface{}) (interface{}, error) {
 		return nil, nil
 	}
 	panic(fmt.Errorf("not equal: %v", args))
+}
+
+func printI32(args ...interface{}) (interface{}, error) {
+	fmt.Printf("%v\n", args[0])
+	return nil, nil
 }

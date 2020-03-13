@@ -14,6 +14,7 @@ func newPrinter() printer {
 }
 
 func (p *printer) print(s string) {
+	//fmt.Print(s)
 	p.sb.WriteString(s)
 }
 
@@ -34,6 +35,6 @@ func (p *printer) printIf(cond bool, s1, s2 string) {
 	}
 }
 
-func (p *printer)  String() string {
+func (p *printer) String() string {
 	return p.sb.String()
 }

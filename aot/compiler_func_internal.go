@@ -539,11 +539,11 @@ func (c *internalFuncCompiler) emitBlock(expr []binary.Instruction, isLoop, hasR
 	}
 	c.exitBlock()
 	if isBrTarget(expr) {
-		c.printIndentsPlus(-1)
-		c.printf("break // _l%d\n", c.blockDepth())
+		c.printIndentsPlus(1)
+		c.printf("break _l%d\n", c.blockDepth())
 		c.printIndents()
 		c.printf("} // end of _l%d\n", c.blockDepth())
-	}  else {
+	} else {
 		c.printIndents()
 		c.printf("} // end of _l%d\n", c.blockDepth())
 	}
