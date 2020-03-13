@@ -11,12 +11,12 @@ func analyzeBr(code binary.Code) {
 	analyzeExpr(0, code.Expr)
 }
 
-func analyzeExpr(depth uint32, expr binary.Expr) (targets []uint32) {
+func analyzeExpr(depth uint32, expr binary.Expr) (allTargets []uint32) {
 	for i, instr := range expr {
 		switch instr.Opcode {
 		case binary.Block, binary.Loop:
 			args := instr.Args.(binary.BlockArgs)
-			targets = analyzeExpr(depth+1, args.Instrs)
+			targets := analyzeExpr(depth+1, args.Instrs)
 			for _, target := range targets {
 				if target == depth+1 {
 					args.Instrs = append(args.Instrs, binary.Instruction{Opcode: 0xFF})
@@ -24,9 +24,10 @@ func analyzeExpr(depth uint32, expr binary.Expr) (targets []uint32) {
 					break
 				}
 			}
+			allTargets = append(allTargets, targets...)
 		case binary.If:
 			args := instr.Args.(binary.IfArgs)
-			targets = analyzeExpr(depth+1, args.Instrs1)
+			targets := analyzeExpr(depth+1, args.Instrs1)
 			targets2 := analyzeExpr(depth+1, args.Instrs2)
 			targets = append(targets, targets2...)
 			for _, target := range targets {
@@ -36,18 +37,19 @@ func analyzeExpr(depth uint32, expr binary.Expr) (targets []uint32) {
 					break
 				}
 			}
+			allTargets = append(allTargets, targets...)
 		case binary.Br:
-			targets = []uint32{depth - instr.Args.(uint32)}
+			allTargets = append(allTargets, depth-instr.Args.(uint32))
 		case binary.BrIf:
-			targets = []uint32{depth - instr.Args.(uint32)}
+			allTargets = append(allTargets, depth-instr.Args.(uint32))
 		case binary.BrTable:
 			args := instr.Args.(binary.BrTableArgs)
 			for _, label := range args.Labels {
-				targets = append(targets, depth-label)
+				allTargets = append(allTargets, depth-label)
 			}
-			targets = append(targets, depth-args.Default)
+			allTargets = append(allTargets, depth-args.Default)
 		case binary.Return:
-			targets = []uint32{0}
+			//allTargets = append(allTargets, 0)
 		}
 	}
 	return

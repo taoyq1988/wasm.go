@@ -117,6 +117,7 @@ func (c *internalFuncCompiler) genFuncBody(code binary.Code, resultCount int) {
 func (c *internalFuncCompiler) emitInstr(instr binary.Instruction) {
 	switch instr.Opcode {
 	case binary.Block, binary.Loop, binary.If:
+	case binary.BrTable:
 	default:
 		c.printIndents()
 	}
@@ -595,7 +596,6 @@ func (c *internalFuncCompiler) emitIf(ifArgs binary.IfArgs) {
 
 func (c *internalFuncCompiler) emitBr(labelIdx uint32) {
 	n := len(c.blocks) - int(labelIdx) - 1
-	c.printIndents()
 	c.printIf(c.blocks[n].isLoop, "continue ", "break ")
 	c.printf("_l%d // br %d\n", n, labelIdx)
 }
@@ -624,7 +624,6 @@ func (c *internalFuncCompiler) emitBrTable(btArgs binary.BrTableArgs) {
 	//c.printf("}")
 }
 func (c *internalFuncCompiler) emitReturn() {
-	c.printIndents()
 	c.printf("return l%d\n", c.stackPtr-1)
 }
 
