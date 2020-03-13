@@ -520,19 +520,19 @@ l0: for {
 }
 */
 func (c *internalFuncCompiler) emitBlock(expr []binary.Instruction, isLoop, hasResult bool) {
-	c.enterBlock(isLoop, hasResult)
 	if isBrTarget(expr) {
 		c.printIndents()
 		c.printf("_l%d: for {\n", c.blockDepth()-1)
 	}
+	c.enterBlock(isLoop, hasResult)
 	for _, instr := range expr {
 		c.emitInstr(instr)
 	}
+	c.exitBlock()
 	if isBrTarget(expr) {
 		c.printIndents()
 		c.printf("break } // end of _l%d\n", c.blockDepth()-1)
 	}
-	c.exitBlock()
 }
 
 /*
@@ -555,24 +555,33 @@ l0: for {
 }
 */
 func (c *internalFuncCompiler) emitIf(ifArgs binary.IfArgs) {
-	c.printIndents()
-	c.printf("/*_l%d:*/ for {\n", c.blockDepth()-1)
+	if isBrTarget(ifArgs.Instrs1) {
+		c.printIndents()
+		c.printf("_l%d: for {\n", c.blockDepth()-1)
+	}
+	c.enterBlock(false, len(ifArgs.RT) > 0)
 
 	c.printIndents()
 	c.printf("if l%d > 0 {\n", c.stackPtr-1)
 	c.stackPop()
-	c.emitBlock(ifArgs.Instrs1, false, len(ifArgs.RT) > 0)
+	for _, instr := range ifArgs.Instrs1 {
+		c.emitInstr(instr)
+	}
 	if len(ifArgs.Instrs2) > 0 {
 		c.printIndents()
 		c.println("} else {")
-		c.emitBlock(ifArgs.Instrs2, false, len(ifArgs.RT) > 0)
+	}
+	for _, instr := range ifArgs.Instrs2 {
+		c.emitInstr(instr)
 	}
 	c.printIndents()
 	c.println("}")
 
-	c.printIndents()
-	c.printf("break } // end of _l%d\n", c.blockDepth()-1)
 	c.exitBlock()
+	if isBrTarget(ifArgs.Instrs1) {
+		c.printIndents()
+		c.printf("break } // end of _l%d\n", c.blockDepth()-1)
+	}
 }
 
 func (c *internalFuncCompiler) emitBr(labelIdx uint32) {
