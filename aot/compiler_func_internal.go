@@ -544,7 +544,7 @@ func (c *internalFuncCompiler) emitBlock(expr []binary.Instruction, isLoop, hasR
 		c.printf("} // end of _l%d\n", c.blockDepth())
 	}  else {
 		c.printIndents()
-		c.println("}")
+		c.printf("} // end of _l%d\n", c.blockDepth())
 	}
 }
 
