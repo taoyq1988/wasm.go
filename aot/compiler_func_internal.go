@@ -657,7 +657,7 @@ func (c *internalFuncCompiler) emitCallIndirect(typeIdx int) {
 	ft := c.moduleInfo.module.TypeSec[typeIdx]
 	c.stackPtr -= len(ft.ParamTypes)
 	if len(ft.ResultTypes) > 0 {
-		c.printf("l%d = ", c.stackPtr)
+		c.printf("l%d, _ = ", c.stackPtr)
 	}
 	c.printf("m.table.GetElem(l%d).Call(", elemIdx)
 
