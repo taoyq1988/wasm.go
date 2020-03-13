@@ -69,6 +69,7 @@ func (c *internalFuncCompiler) blockDepth() int {
 func (c *internalFuncCompiler) compile(idx int,
 	ft binary.FuncType, code binary.Code) string {
 
+	analyzeBr(code)
 	paramCount := len(ft.ParamTypes)
 	resultCount := len(ft.ResultTypes)
 	localCount := code.GetLocalCount()

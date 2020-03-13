@@ -2,16 +2,21 @@ package aot
 
 import "github.com/zxh0/wasm.go/binary"
 
-func analyzeBr(code binary.Code) {
-	analyzerExpr(0, code.Expr)
+func isBrTarget(block binary.Expr) bool {
+	n := len(block)
+	return n > 0 && block[n-1].Opcode == 0xFF
 }
 
-func analyzerExpr(depth uint32, expr binary.Expr) (targets []uint32) {
+func analyzeBr(code binary.Code) {
+	analyzeExpr(0, code.Expr)
+}
+
+func analyzeExpr(depth uint32, expr binary.Expr) (targets []uint32) {
 	for i, instr := range expr {
 		switch instr.Opcode {
 		case binary.Block, binary.Loop:
 			args := instr.Args.(binary.BlockArgs)
-			targets = analyzerExpr(depth+1, args.Instrs)
+			targets = analyzeExpr(depth+1, args.Instrs)
 			for _, target := range targets {
 				if target == depth+1 {
 					args.Instrs = append(args.Instrs, binary.Instruction{Opcode: 0xFF})
@@ -21,8 +26,8 @@ func analyzerExpr(depth uint32, expr binary.Expr) (targets []uint32) {
 			}
 		case binary.If:
 			args := instr.Args.(binary.IfArgs)
-			targets = analyzerExpr(depth+1, args.Instrs1)
-			targets2 := analyzerExpr(depth+1, args.Instrs2)
+			targets = analyzeExpr(depth+1, args.Instrs1)
+			targets2 := analyzeExpr(depth+1, args.Instrs2)
 			targets = append(targets, targets2...)
 			for _, target := range targets {
 				if target == depth+1 {
