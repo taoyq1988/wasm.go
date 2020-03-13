@@ -7,8 +7,15 @@ func isBrTarget(block binary.Expr) bool {
 	return n > 0 && block[n-1].Opcode == 0xFF
 }
 
-func analyzeBr(code binary.Code) {
-	analyzeExpr(0, code.Expr)
+func analyzeBr(code binary.Code) []binary.Instruction {
+	expr := code.Expr
+	brTargets := analyzeExpr(0, expr)
+	for _, target := range brTargets {
+		if target == 0 {
+			return append(expr, binary.Instruction{Opcode: 0xFF})
+		}
+	}
+	return expr
 }
 
 func analyzeExpr(depth uint32, expr binary.Expr) (allTargets []uint32) {

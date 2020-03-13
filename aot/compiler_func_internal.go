@@ -71,7 +71,6 @@ func (c *internalFuncCompiler) blockDepth() int {
 func (c *internalFuncCompiler) compile(idx int,
 	ft binary.FuncType, code binary.Code) string {
 
-	analyzeBr(code)
 	paramCount := len(ft.ParamTypes)
 	resultCount := len(ft.ResultTypes)
 	localCount := code.GetLocalCount()
@@ -108,7 +107,8 @@ func genLocals(paramCount, stackMax int) string {
 }
 
 func (c *internalFuncCompiler) genFuncBody(code binary.Code, resultCount int) {
-	c.emitBlock(code.Expr, false, resultCount > 0)
+	expr := analyzeBr(code)
+	c.emitBlock(expr, false, resultCount > 0)
 	if resultCount > 0 {
 		c.printf("\treturn l%d\n", c.stackPtr-1)
 	}
