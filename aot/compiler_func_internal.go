@@ -595,11 +595,9 @@ func (c *internalFuncCompiler) emitIf(ifArgs binary.IfArgs) {
 
 func (c *internalFuncCompiler) emitBr(labelIdx uint32) {
 	n := len(c.blocks) - int(labelIdx) - 1
-	if c.blocks[n].isLoop {
-		c.printf("continue _l%d // br\n", n)
-	} else {
-		c.printf("break _l%d // br\n", n)
-	}
+	c.printIndents()
+	c.printIf(c.blocks[n].isLoop, "continue", "break")
+	c.printf("_l%d // br %d\n", n, labelIdx)
 }
 func (c *internalFuncCompiler) emitBrIf(labelIdx uint32) {
 	n := len(c.blocks) - int(labelIdx) - 1
@@ -617,6 +615,7 @@ func (c *internalFuncCompiler) emitBrTable() {
 func (c *internalFuncCompiler) emitReturn() {
 	panic("TODO")
 }
+
 func (c *internalFuncCompiler) emitCall(funcIdx int) {
 	ft := c.moduleInfo.getFuncType(funcIdx)
 	c.stackPtr -= len(ft.ParamTypes)
