@@ -148,7 +148,7 @@ func (c *internalFuncCompiler) emitInstr(instr binary.Instruction) {
 	case binary.Call:
 		c.emitCall(int(instr.Args.(uint32)))
 	case binary.CallIndirect:
-		c.emitCallIndirect()
+		c.emitCallIndirect(int(instr.Args.(uint32)))
 	case binary.Drop:
 		c.printf("// %s\n", opname)
 		c.stackPop()
@@ -650,8 +650,26 @@ func (c *internalFuncCompiler) emitCall(funcIdx int) {
 	}
 	c.printf(") // call func#%d\n", funcIdx)
 }
-func (c *internalFuncCompiler) emitCallIndirect() {
-	panic("TODO")
+func (c *internalFuncCompiler) emitCallIndirect(typeIdx int) {
+	elemIdx := c.stackPtr - 1
+	c.stackPop()
+
+	ft := c.moduleInfo.module.TypeSec[typeIdx]
+	c.stackPtr -= len(ft.ParamTypes)
+	if len(ft.ResultTypes) > 0 {
+		c.printf("l%d = ", c.stackPtr)
+	}
+	c.printf("m.table.GetElem(l%d).Call(", elemIdx)
+
+	for i := range ft.ParamTypes {
+		c.printIf(i > 0, ", ", "")
+		c.printf("l%d", c.stackPtr+i) // TODO
+	}
+	if len(ft.ResultTypes) > 0 {
+		c.stackPtr++
+	}
+
+	c.printf(") // call_indirect type#%d\n", typeIdx)
 }
 
 func (c *internalFuncCompiler) emitLoad(instr binary.Instruction, tmpl string) {
