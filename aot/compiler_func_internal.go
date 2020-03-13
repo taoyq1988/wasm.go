@@ -518,6 +518,7 @@ func (c *internalFuncCompiler) emitInstr(instr binary.Instruction) {
 		c.printf("// %s\n", opname) // TODO
 	case binary.F64ReinterpretI64:
 		c.printf("// %s\n", opname) // TODO
+	case 0xFF:
 	default:
 		c.printf("// 0x%X ???\n", instr.Opcode)
 	}
@@ -540,8 +541,10 @@ func (c *internalFuncCompiler) emitBlock(expr []binary.Instruction, isLoop, hasR
 	}
 	c.exitBlock()
 	if isBrTarget(expr) {
+		c.printIndentsPlus(-1)
+		c.println("break")
 		c.printIndents()
-		c.printf("break } // end of _l%d\n", c.blockDepth()-1)
+		c.printf("} // end of _l%d\n", c.blockDepth()-1)
 	}
 }
 
@@ -613,8 +616,8 @@ func (c *internalFuncCompiler) emitBrIf(labelIdx uint32) {
 	if c.blocks[n].isLoop {
 		br = "continue"
 	}
-	c.printf("if l%d != 0 { %s%s _l%d } // br_if\n",
-		c.stackPtr-1, ret, br, n)
+	c.printf("if l%d != 0 { %s%s _l%d } // br_if %d\n",
+		c.stackPtr-1, ret, br, n, labelIdx)
 	c.stackPop()
 }
 func (c *internalFuncCompiler) emitBrTable() {
