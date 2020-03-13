@@ -64,7 +64,7 @@ func (c *internalFuncCompiler) enterBlock(isLoop, hasResult bool) {
 	})
 }
 func (c *internalFuncCompiler) exitBlock() {
-	c.blocks = c.blocks[len(c.blocks)-1:]
+	c.blocks = c.blocks[:len(c.blocks)-1]
 }
 func (c *internalFuncCompiler) blockDepth() int {
 	return len(c.blocks)
