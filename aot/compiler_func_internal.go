@@ -610,18 +610,19 @@ func (c *internalFuncCompiler) emitBrIf(labelIdx uint32) {
 	c.stackPop()
 }
 func (c *internalFuncCompiler) emitBrTable(btArgs binary.BrTableArgs) {
-	//c.printIndents()
-	//c.printf("// br_table %v %d\n", btArgs.Labels, btArgs.Default)
-	//for i, label := range btArgs.Labels {
-	//	c.printIndents()
-	//	c.printIf(i > 0, "} else ", "")
-	//	c.printf("if l%d == %d {\n", c.stackPtr-1, i)
-	//	c.printIndentsPlus(1)
-	//	n := len(c.blocks) - int(label) - 1
-	//	c.printIf(c.blocks[n].isLoop, "continue ", "break ")
-	//	c.printf("_l%d //\n", n)
-	//}
-	//c.printf("}")
+	c.printIndents()
+	c.printf("// br_table %v %d\n", btArgs.Labels, btArgs.Default)
+	for i, label := range btArgs.Labels {
+		c.printIndents()
+		c.printIf(i > 0, "} else ", "")
+		c.printf("if l%d == %d {\n", c.stackPtr-1, i)
+		c.printIndentsPlus(1)
+		n := len(c.blocks) - int(label) - 1
+		c.printIf(c.blocks[n].isLoop, "continue ", "break ")
+		c.printf("_l%d //\n", n)
+	}
+	c.printIndents()
+	c.println("}")
 }
 func (c *internalFuncCompiler) emitReturn() {
 	c.printf("return l%d\n", c.stackPtr-1)
